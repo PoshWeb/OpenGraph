@@ -1,6 +1,6 @@
 @{
     RootModule = 'OpenGraph.psm1'
-    ModuleVersion = '0.1'
+    ModuleVersion = '0.1.1'
     GUID = 'be4e4070-1ea6-4a2e-8b6a-c6b7755e5ace'
     Author = 'JamesBrundage'
     CompanyName = 'Start-Automating'
@@ -11,21 +11,28 @@
     TypesToProcess = 'OpenGraph.types.ps1xml'
     PrivateData = @{
         PSData = @{
-            Tags = @('OpenGraph','SEO','Web','PowerShellWeb' )
-            ProjectURI = 'https://github.com/PowerShellWeb/OpenGraph'
-            LicenseURI = 'https://github.com/PowerShellWeb/OpenGraph/blob/main/LICENSE'
+            Tags = @('OpenGraph','SEO','Web','PoshWeb','OpenGraphProtocol')
+            ProjectURI = 'https://github.com/PoshWeb/OpenGraph'
+            LicenseURI = 'https://github.com/PoshWeb/OpenGraph/blob/main/LICENSE'
             ReleaseNotes = @'
-> Like It? [Star It](https://github.com/PowerShellWeb/OpenGraph)
-> Love It? [Support It](https://github.com/sponsors/StartAutomating)
+## OpenGraph 0.1.1
 
-## OpenGraph 0.1
-
-* `OpenGraph.ToString()` now returns HTML (#10)
-* `Get-OpenGraph` now caches results (#11)
+* Simplified Module Scaffolding (#14)
+* Supporting open or closed tags (#15)
+* `Get-OpenGraph -Html` supports direct content (#16)
+* `Get-OpenGraph -Url` is now positional and pipeable (#17)
+* Improving README (#18)
 
 ---
 
-Additional release notes can be found at [CHANGELOG.md](https://github.com/PowerShellWeb/OpenGraph/blob/main/CHANGELOG.md)
+Please: 
+
+* [Like](https://github.com/PoshWeb/OpenGraph)
+* [Share](https://github.com/PoshWeb/OpenGraph)
+* [Subscribe](https://github.com/PoshWeb/)
+* [Support](https://github.com/sponsors/StartAutomating)
+
+Additional history found available in the [CHANGELOG.md](https://github.com/PoshWeb/OpenGraph/blob/main/CHANGELOG.md)
 '@        
         }
     }
