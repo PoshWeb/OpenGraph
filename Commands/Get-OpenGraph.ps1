@@ -24,7 +24,7 @@ function Get-OpenGraph
     param(        
     # The URL that may contain Open Graph metadata 
     [Parameter(ValueFromPipelineByPropertyName)]
-    [Uri]
+    [string]
     $Url,
 
     # A dictionary of additional Open Graph metadata to include in the result
@@ -51,7 +51,7 @@ function Get-OpenGraph
         $openGraphMetadata = [Ordered]@{PSTypeName='OpenGraph'}
         if ($Url) {
             if ($script:OpenGraphCache[$url] -and -not $Force) {
-                return $script:OpenGraphCache[$url]
+                return ([PSCustomObject]$script:OpenGraphCache[$url])
             }
             $restResponse = Invoke-RestMethod -Uri $Url
             foreach ($match in $metaRegex.Matches("$restResponse")) {
