@@ -17,11 +17,11 @@ function Get-OpenGraph
         'https://cnn.com/',
             'https://msnbc.com/',
                 'https://fox.com/' |
-                    Get-OpenGraph
+                    Get-OpenGraph    
     #>
-    [Alias('openGraph','ogp')]
+    [Alias('openGraph','ogp','Test-OpenGraph', 'Test-OGP')]
     [CmdletBinding(PositionalBinding=$false)]
-    param(        
+    param(
     # A list of any arguments. 
     # This allows the command to take natural input.    
     [Parameter(ValueFromRemainingArguments)]
@@ -56,10 +56,11 @@ function Get-OpenGraph
         $metaRegex = [Regex]::new('<meta.+?/>','IgnoreCase','00:00:00.1')
         if (-not $script:OpenGraphCache) {
             $script:OpenGraphCache = [Ordered]@{}
-        }        
+        }
     }
 
     process {
+        # Turn any of our strongly bound parameters into arguments
         if ($Url) {
             $argumentList = @($argumentList) + $url
         }
@@ -113,7 +114,11 @@ function Get-OpenGraph
                 }
             }
             
+            # If there was no metadata
             if (-not $openGraphMetadata.Count) {
+                # output false (so `Test-` verb scenarios are met)
+                $false
+                # and continue to the next argument.
                 continue nextArgument
             }
 
