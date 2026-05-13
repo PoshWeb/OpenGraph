@@ -22,6 +22,13 @@ function Get-OpenGraph
     [Alias('openGraph','ogp')]
     [CmdletBinding(PositionalBinding=$false)]
     param(        
+    # A list of any arguments. 
+    # This allows the command to take natural input.    
+    [Parameter(ValueFromRemainingArguments)]
+    [Alias('Argument','Arguments','Args')]
+    [PSObject[]]
+    $ArgumentList,
+    
     # The URL that may contain Open Graph metadata 
     [Parameter(ValueFromPipelineByPropertyName)]
     [string]
@@ -35,7 +42,13 @@ function Get-OpenGraph
     # If set, forces the function to retrieve the Open Graph metadata even if it is already cached.
     [Parameter(ValueFromPipelineByPropertyName)]
     [switch]
-    $Force
+    $Force,
+
+    # Any number of input objects
+    [Parameter(ValueFromPipeline)]
+    [Alias('Input')]
+    [PSObject[]]
+    $InputObject
     )
 
     begin {
@@ -43,33 +56,68 @@ function Get-OpenGraph
         $metaRegex = [Regex]::new('<meta.+?/>','IgnoreCase','00:00:00.1')
         if (-not $script:OpenGraphCache) {
             $script:OpenGraphCache = [Ordered]@{}
-        }
+        }        
     }
 
     process {
-        # Declare an empty object to hold the Open Graph metadata
-        $openGraphMetadata = [Ordered]@{PSTypeName='OpenGraph'}
         if ($Url) {
-            if ($script:OpenGraphCache[$url] -and -not $Force) {
-                return ([PSCustomObject]$script:OpenGraphCache[$url])
-            }
-            $restResponse = Invoke-RestMethod -Uri $Url
-            foreach ($match in $metaRegex.Matches("$restResponse")) {
-                $matchXml = "$match" -as [xml]
-                if ($matchXml.meta.property -and $matchXml.meta.content) {
-                    $openGraphMetadata[$matchXml.meta.property] = $matchXml.meta.content
-                }
-            }
-            $script:OpenGraphCache[$url] = $openGraphMetadata
+            $argumentList = @($argumentList) + $url
         }
         if ($Data) {
-            foreach ($key in $Data.Keys) {
-                $openGraphMetadata[$key] = $Data[$key]
-            }
+            $argumentList = @($argumentList) + $Data
+        }
+        if ($InputObject) {
+            $ArgumentList = @($ArgumentList) + $InputObject
         }
         
-        if (-not $openGraphMetadata.Count) { return }
+        :nextArgument foreach ($argument in $argumentList) {
+            # Declare an empty object to hold the Open Graph metadata            
+            if (-not $argument) { continue }
+            $openGraphMetadata = [Ordered]@{PSTypeName='OpenGraph'}
+            $url, $data = $null, $null
+            
+            if ($argument -as [uri]) {
+                $url = $argument -as [uri]
+            } elseif ($argument -is [Collections.IDictionary]) {
+                $data = $argument
+            } else {
+                Write-Warning "Only [uri] and [Collections.IDictionary] supported: $argument"
+                continue nextArgument
+            }
 
-        [PSCustomObject]$openGraphMetadata                
+            if ($Url) {
+                if ($script:OpenGraphCache[$url] -and -not $Force) {
+                    foreach ($key in $script:OpenGraphCache[$url].Keys) {
+                        $openGraphMetadata[$key] =
+                            $script:OpenGraphCache[$url][$key]
+                    }
+                    ([PSCustomObject]$script:OpenGraphCache[$url])
+                    continue nextArgument
+                }
+
+                $restResponse = Invoke-RestMethod -Uri $Url
+                
+                foreach ($match in $metaRegex.Matches("$restResponse")) {
+                    $matchXml = "$match" -as [xml]
+                    if ($matchXml.meta.property -and $matchXml.meta.content) {
+                        $openGraphMetadata[$matchXml.meta.property] = $matchXml.meta.content
+                    }                    
+                }
+
+                $script:OpenGraphCache[$url] = $openGraphMetadata
+            }
+
+            if ($Data) {
+                foreach ($key in $Data.Keys) {
+                    $openGraphMetadata[$key] = $Data[$key]
+                }
+            }
+            
+            if (-not $openGraphMetadata.Count) {
+                continue nextArgument
+            }
+
+            [PSCustomObject]$openGraphMetadata
+        }
     }
 }
