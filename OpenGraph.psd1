@@ -11,12 +11,11 @@
     TypesToProcess = 'OpenGraph.types.ps1xml'
     PrivateData = @{
         PSData = @{
-            Tags = @('OpenGraph','SEO','Web','PowerShellWeb' )
-            ProjectURI = 'https://github.com/PowerShellWeb/OpenGraph'
-            LicenseURI = 'https://github.com/PowerShellWeb/OpenGraph/blob/main/LICENSE'
+            Tags = @('OpenGraph','SEO','Web','PoshWeb','OpenGraphProtocol')
+            ProjectURI = 'https://github.com/PoshWeb/OpenGraph'
+            LicenseURI = 'https://github.com/PoshWeb/OpenGraph/blob/main/LICENSE'
             ReleaseNotes = @'
-> Like It? [Star It](https://github.com/PowerShellWeb/OpenGraph)
-> Love It? [Support It](https://github.com/sponsors/StartAutomating)
+## OpenGraph 0.1.1
 
 ## OpenGraph 0.1.1
 
@@ -28,7 +27,14 @@
 
 ---
 
-Additional release notes can be found at [CHANGELOG.md](https://github.com/PowerShellWeb/OpenGraph/blob/main/CHANGELOG.md)
+Please: 
+
+* [Like](https://github.com/PoshWeb/OpenGraph)
+* [Share](https://github.com/PoshWeb/OpenGraph)
+* [Subscribe](https://github.com/PoshWeb/)
+* [Support](https://github.com/sponsors/StartAutomating)
+
+Additional history found available in the [CHANGELOG.md](https://github.com/PoshWeb/OpenGraph/blob/main/CHANGELOG.md)
 '@        
         }
     }

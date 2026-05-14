@@ -36,6 +36,11 @@ function Get-OpenGraph
     [string]
     $Url,
 
+    # Any HTML that may contain open graph metadata.
+    [Parameter(ValueFromPipelineByPropertyName)]
+    [string]
+    $Html,
+
     # A dictionary of additional Open Graph metadata to include in the result
     [Parameter(ValueFromPipelineByPropertyName)]
     [Collections.IDictionary]
@@ -66,6 +71,8 @@ function Get-OpenGraph
         if ($Url) {
             $argumentList = @($argumentList) + $url
         }
+
+        # If any data was provided
         if ($Data) {
             $argumentList = @($argumentList) + $Data
         }
