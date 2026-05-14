@@ -17,7 +17,9 @@ function Get-OpenGraph
         'https://cnn.com/',
             'https://msnbc.com/',
                 'https://fox.com/' |
-                    Get-OpenGraph    
+                    Get-OpenGraph
+    .EXAMPLE
+        OpenGraph https://posh.pckt.blog/static-sites-are-simple-6u51kgj        
     #>
     [Alias('openGraph','ogp','Test-OpenGraph', 'Test-OGP')]
     [CmdletBinding(PositionalBinding=$false)]
@@ -53,7 +55,7 @@ function Get-OpenGraph
 
     begin {
         # Make a regex to match meta tags
-        $metaRegex = [Regex]::new('<meta.+?/>','IgnoreCase','00:00:00.1')
+        $metaRegex = [Regex]::new('<meta.+?/?>','IgnoreCase','00:00:00.1')
         if (-not $script:OpenGraphCache) {
             $script:OpenGraphCache = [Ordered]@{}
         }
@@ -99,10 +101,14 @@ function Get-OpenGraph
                 $restResponse = Invoke-RestMethod -Uri $Url
                 
                 foreach ($match in $metaRegex.Matches("$restResponse")) {
-                    $matchXml = "$match" -as [xml]
+                    $matchXml = (
+                        # close unclosed `<meta>` tags.
+                        "$match" -replace '/?>$','/>'
+                    ) -as [xml]
+
                     if ($matchXml.meta.property -and $matchXml.meta.content) {
                         $openGraphMetadata[$matchXml.meta.property] = $matchXml.meta.content
-                    }                    
+                    }
                 }
 
                 $script:OpenGraphCache[$url] = $openGraphMetadata
