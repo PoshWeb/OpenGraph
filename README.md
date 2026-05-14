@@ -20,7 +20,7 @@ Import-Module OpenGraph -PassThru
 You can also clone the repo and import the module locally:
 
 ~~~PowerShell
-git clone https://github.com/PoshWeb/OpenGraph
+git clone https://github.com/PowerShellWeb/OpenGraph
 cd ./OpenGraph
 Import-Module ./ -PassThru
 ~~~
@@ -40,10 +40,11 @@ This function retrieves the Open Graph metadata from a given URL and returns it 
 
 |Name|Type|Description|
 |-|-|-|
-|Url|Uri|The URL that may contain Open Graph metadata|
-|Html|String|Any HTML that may contain open graph metadata.|
+|ArgumentList|PSObject[]|A list of any arguments. <br/>This allows the command to take natural input.|
+|Url|String|The URL that may contain Open Graph metadata|
 |Data|IDictionary|A dictionary of additional Open Graph metadata to include in the result|
 |Force|SwitchParameter|If set, forces the function to retrieve the Open Graph metadata even if it is already cached.|
+|InputObject|PSObject[]|Any number of input objects|
 
 ##### Examples
 ###### Example 1
@@ -57,8 +58,10 @@ Get-OpenGraph -Url https://abc.com/
         'https://fox.com/' |
             Get-OpenGraph
 ~~~
-#### Links
-* [https://ogp.me/](https://ogp.me/)
+###### Example 3
+~~~PowerShell
+
+~~~
 ## Types
 ### OpenGraph
 #### Members
@@ -66,6 +69,6 @@ Get-OpenGraph -Url https://abc.com/
 |-|-|
 |[ToString](Types/OpenGraph/ToString.ps1)|ScriptMethod|
 |[get_HTML](Types/OpenGraph/get_HTML.ps1)|ScriptProperty|
-> (c) 2025 Start-Automating
+> (c) 2025-2026 Start-Automating
 
-> [LICENSE](https://github.com/PoshWeb/OpenGraph/blob/main/LICENSE)
+> [LICENSE](https://github.com/PowerShellWeb/OpenGraph/blob/main/LICENSE)

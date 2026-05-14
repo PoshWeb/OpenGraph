@@ -17,8 +17,6 @@
             ReleaseNotes = @'
 ## OpenGraph 0.1.1
 
-## OpenGraph 0.1.1
-
 * `Get-OpenGraph` now supports unclosed `<meta>` tags (#23)
 * `Test-OpenGraph` and `Test-OGP` are aliases of `Get-OpenGraph` (#22).
   * Additionally, `Get-OpenGraph` now outputs `$false` when no OpenGraph tags are found.
