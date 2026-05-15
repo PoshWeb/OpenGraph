@@ -1,6 +1,6 @@
 @{
     RootModule = 'OpenGraph.psm1'
-    ModuleVersion = '0.1.1'
+    ModuleVersion = '0.1.2'
     GUID = 'be4e4070-1ea6-4a2e-8b6a-c6b7755e5ace'
     Author = 'James Brundage'
     CompanyName = 'Start-Automating'
@@ -15,13 +15,13 @@
             ProjectURI = 'https://github.com/PoshWeb/OpenGraph'
             LicenseURI = 'https://github.com/PoshWeb/OpenGraph/blob/main/LICENSE'
             ReleaseNotes = @'
-## OpenGraph 0.1.1
+## OpenGraph 0.1.2
 
-* `Get-OpenGraph` now supports unclosed `<meta>` tags (#23)
 * `Test-OpenGraph` and `Test-OGP` are aliases of `Get-OpenGraph` (#22).
   * Additionally, `Get-OpenGraph` now outputs `$false` when no OpenGraph tags are found.
 * `Get-OpenGraph` now accepts any pipeline input and number of arguments (#21)
 * `Get-OpenGraph` correctly outputs cached results (#20)
+* `Get-OpenGraph` internally encapsulates each scenario into a filter (#25)
 
 ---
 
