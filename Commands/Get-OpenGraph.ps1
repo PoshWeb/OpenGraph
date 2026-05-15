@@ -14,10 +14,7 @@ function Get-OpenGraph
     .EXAMPLE        
         Get-OpenGraph -Url https://abc.com/
     .EXAMPLE        
-        'https://cnn.com/',
-            'https://msnbc.com/',
-                'https://fox.com/' |
-                    Get-OpenGraph
+        'https://thebulwark.com/' | Get-OpenGraph
     .EXAMPLE
         OpenGraph https://posh.pckt.blog/static-sites-are-simple-6u51kgj        
     #>
@@ -64,18 +61,52 @@ function Get-OpenGraph
         if (-not $script:OpenGraphCache) {
             $script:OpenGraphCache = [Ordered]@{}
         }
+
+        filter OpenGraphFromData {
+            $data = $_ -as [Collections.IDictionary]
+            $openGraphMetadata = [Ordered]@{PSTypeName='OpenGraph'}
+            foreach ($key in $Data.Keys) {
+                $openGraphMetadata[$key] = $Data[$key]
+            }
+            [PSCustomObject]$openGraphMetadata
+        }
+
+        filter OpenGraphFromUrl {
+            $url = $_ -as [uri]            
+            if ($script:OpenGraphCache[$url] -and -not $Force) {                
+                return $script:OpenGraphCache[$url]
+            }
+
+            $script:OpenGraphCache[$url] = Invoke-RestMethod -Uri $Url | 
+                OpenGraphFromHtml
+            $script:OpenGraphCache[$url]
+        }
+
+        filter OpenGraphFromHtml {
+            $text = "$_"
+            $openGraphMetadata = [Ordered]@{PSTypeName='OpenGraph'}
+            foreach ($match in $metaRegex.Matches($text)) {
+                $matchXml = (
+                    # close unclosed `<meta>` tags.
+                    "$match" -replace '/?>$','/>'
+                ) -as [xml]
+
+                if ($matchXml.meta.property -and $matchXml.meta.content) {
+                    $openGraphMetadata[$matchXml.meta.property] = $matchXml.meta.content
+                }
+            }
+            [PSCustomObject]$openGraphMetadata
+        }
     }
 
     process {
         # Turn any of our strongly bound parameters into arguments
-        if ($Url) {
-            $argumentList = @($argumentList) + $url
-        }
-
+        if ($Url) {$Url | OpenGraphFromUrl }
         # If any data was provided
-        if ($Data) {
-            $argumentList = @($argumentList) + $Data
-        }
+        if ($Data) {$Data | OpenGraphFromData }
+
+        if ($html) { $Html | OpenGraphFromHtml }
+        
         if ($InputObject) {
             $ArgumentList = @($ArgumentList) + $InputObject
         }
@@ -83,59 +114,40 @@ function Get-OpenGraph
         :nextArgument foreach ($argument in $argumentList) {
             # Declare an empty object to hold the Open Graph metadata            
             if (-not $argument) { continue }
-            $openGraphMetadata = [Ordered]@{PSTypeName='OpenGraph'}
-            $url, $data = $null, $null
+            $openGraphMetadata = [Ordered]@{PSTypeName='OpenGraph'}            
             
-            if ($argument -as [uri]) {
-                $url = $argument -as [uri]
+            $openGraphMetadata = if ($argument -as [uri] -and 
+                $argument -match '^https?://'
+            ) {
+                $argument -as [uri] | OpenGraphFromUrl
             } elseif ($argument -is [Collections.IDictionary]) {
-                $data = $argument
-            } else {
-                Write-Warning "Only [uri] and [Collections.IDictionary] supported: $argument"
+                $argument | OpenGraphFromData
+            } 
+            elseif ($argument -is [string] -and 
+                $argument -match '\<meta') {
+                $argument | OpenGraphFromHtml
+            }
+            else {
+                Write-Warning (
+                    @(
+                        "Unsupported argument:"
+                        "[uri],[Collections.IDictionary], and [string]s matching <meta> are supported: $argument"
+                    ) -join [Environment]::NewLine
+                )
                 continue nextArgument
             }
-
-            if ($Url) {
-                if ($script:OpenGraphCache[$url] -and -not $Force) {
-                    foreach ($key in $script:OpenGraphCache[$url].Keys) {
-                        $openGraphMetadata[$key] =
-                            $script:OpenGraphCache[$url][$key]
-                    }
-                    ([PSCustomObject]$script:OpenGraphCache[$url])
-                    continue nextArgument
-                }
-
-                $restResponse = Invoke-RestMethod -Uri $Url
-                
-                foreach ($match in $metaRegex.Matches("$restResponse")) {
-                    $matchXml = (
-                        # close unclosed `<meta>` tags.
-                        "$match" -replace '/?>$','/>'
-                    ) -as [xml]
-
-                    if ($matchXml.meta.property -and $matchXml.meta.content) {
-                        $openGraphMetadata[$matchXml.meta.property] = $matchXml.meta.content
-                    }
-                }
-
-                $script:OpenGraphCache[$url] = $openGraphMetadata
-            }
-
-            if ($Data) {
-                foreach ($key in $Data.Keys) {
-                    $openGraphMetadata[$key] = $Data[$key]
-                }
-            }
-            
+                    
             # If there was no metadata
-            if (-not $openGraphMetadata.Count) {
+            if (@($openGraphMetadata.psobject.properties).Count -le 1) {
                 # output false (so `Test-` verb scenarios are met)
                 $false
                 # and continue to the next argument.
                 continue nextArgument
             }
 
-            [PSCustomObject]$openGraphMetadata
+            $openGraphMetadata
         }
+
+        $ArgumentList = @()
     }
 }
